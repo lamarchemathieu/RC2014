@@ -9,16 +9,6 @@ __sfr __at 0x01 IN1 ;
 __sfr __at 0x01 OUT1 ;
 
 
-
-#define TYPE uint16_t
-
-TYPE c;
-
-void func(TYPE a, TYPE b)
-{
-	c = a+b;
-}
-
 void putchar(char c)
 {
 	
@@ -74,10 +64,6 @@ int main(void)
 	putchar('\n');
 
 	puts("Demo RC2014 module I/O\r\n");
-
-	func(1,2);
-	func(2,3);
-	func(3,4);
 
 	while(1)
 	{
