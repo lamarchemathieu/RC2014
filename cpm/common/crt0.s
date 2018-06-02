@@ -5,8 +5,9 @@
 
 	.org 	0x0100
 init:
-;	call	gsinit
+	call	gsinit
 	call	_main
+	ret
 
 .area   _HOME
 	.area	_CODE

@@ -3,7 +3,7 @@ TARGET  := out
 CC      := sdcc
 AS	:= sdasz80
 LFLAGS  := -Wl-u
-MFLAGS  := -mz80 --code-loc 0x0200 --data-loc 0 --vc --verbose
+MFLAGS  := -mz80 --code-loc 0x0110 --data-loc 0 --vc
 
 SRCS=${wildcard *.c}
 ASMS=${wildcard *.s}
@@ -26,13 +26,15 @@ ${TARGET}.ihx: ${RELS}
 
 # Conversion de l'Intel Hex en binaire
 ${TARGET}.bin: ${TARGET}.ihx
-	makebin -p < ${TARGET}.ihx > tmp.bin
-	dd if=tmp.bin of=${TARGET}.bin bs=1 skip=256
-	objcopy -I ihex --output-target=binary ${TARGET}.ihx ${TARGET}.com
+	@echo "BIN $@"
+	@makebin -p < ${TARGET}.ihx > tmp.bin
+	@dd if=tmp.bin of=${TARGET}.bin bs=1 skip=256
+	@objcopy -I ihex --output-target=binary ${TARGET}.ihx ${TARGET}.com
 
 ${TARGET}.txt: ${TARGET}.bin
-	mv ${TARGET}.bin ${TARGET}.com
-	./filepack.py ${TARGET}.com > ${TARGET}.txt
+	@echo "TXT $@"
+	@mv ${TARGET}.bin ${TARGET}.com
+	@./filepack.py ${TARGET}.com > ${TARGET}.txt
 
 # Désassemblage à l'écran
 disasm: ${TARGET}.bin
@@ -40,7 +42,8 @@ disasm: ${TARGET}.bin
 
 # Affacement des fichiers, nettoyage
 clean:
-	rm -f *.cdb *.rel *.hex *.ihx *.lst *.map *.o *.rst \
+	@echo "RM $@"
+	@rm -f *.cdb *.rel *.hex *.ihx *.lst *.map *.o *.rst \
 	*.sym *.lnk *.lib *.bin *.mem *.lk *.noi *.asm *.txt *.com
 
 print-%:
