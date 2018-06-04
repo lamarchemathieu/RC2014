@@ -3,7 +3,7 @@ TARGET  := out
 CC      := sdcc
 AS	:= sdasz80
 LFLAGS  := -Wl-u
-MFLAGS  := -mz80 --code-loc 0x0110 --data-loc 0 --vc
+MFLAGS  := -mz80 --code-loc 0x0200 --data-loc 0 --vc
 
 SRCS=${wildcard *.c}
 ASMS=${wildcard *.s}

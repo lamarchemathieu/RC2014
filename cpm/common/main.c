@@ -2,86 +2,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bdos.h"
 
 __sfr __at 0x01 IO1;
 __sfr __at 0x03 IO3;
 
-/*
-void bdos_console_output(uint8_t c) __naked
-{
-	(void)c;
-	__asm
-	LD	HL, #2+0
-	ADD	HL, SP
-	LD E,(HL)
-	LD C, #0x02
-	CALL #0x0005
-	RET
-	__endasm;
-}*/
-
-uint8_t bdos_console_output_c;
-
-void bdos_console_output(uint8_t c)
-{
-	bdos_console_output_c = c;
-	__asm
-	.globl _bdos_console_output_c
-	LD HL, #_bdos_console_output_c
-	LD E,(HL)
-	LD C, #0x02
-	CALL #0x0005
-	RET
-	__endasm;
-}
-
-uint8_t bdos_console_input(void)  __naked
-{
-	__asm
-	LD C, #0x01
-	CALL #0x0005
-	LD L,A
-	RET
-	__endasm;
-}
-
-
-uint16_t bdos_version(void)  __naked
-{
-	__asm
-	LD C, #0x0C
-	CALL #0x0005
-	RET
-	__endasm;
-}
-
-
-#define BDOS_DIRECT_CONSOLE_IO_INPUTSTATUS 0xFF
-
-uint8_t bdos_direct_console_io(uint8_t c) __naked
-{
-	(void)c;
-	__asm
-	LD	HL, #2+0
-	ADD	HL, SP
-	LD E,(HL)
-	LD C, #0x06
-	CALL #0x0005
-	LD L,A
-	RET
-	__endasm;
-}
-
-
-void putchar(char c)
-{
-	bdos_console_output(c);
-}
-
-char getchar(void)
-{
-	return bdos_console_input();
-}
+uint16_t _sp = 0xFFFF;
 
 void putstr(char *str)
 {
@@ -120,7 +46,7 @@ void delay(uint32_t d)
 	for(i=0;i<d;i++)
 	{
 	__asm
-	NOP
+	nop
 	__endasm;
 	}
 }
@@ -141,10 +67,17 @@ int main(void)
 	print_hex((version >> 0)&0x00FF);
 	putstr("\r\n");
 
+	putstr("SP = ");
+	print_hex((_sp >> 8)&0x00FF);
+	print_hex((_sp >> 0)&0x00FF);
+	putstr("\r\n");
+
+
 	putchar('[');
 	putstr(cmd);
 	putchar(']');
 	putstr("\r\n");
+
 
 	IO1 = hex_to_bin(&cmd[1]);
 	IO3 = hex_to_bin(&cmd[3]);
@@ -154,18 +87,32 @@ int main(void)
 		r = bdos_direct_console_io(BDOS_DIRECT_CONSOLE_IO_INPUTSTATUS);
 		if (r)
 		{
+			if ((r >= 0x20) &&  (r<= 0x7F))
+			{
+				bdos_direct_console_io(r);
+			}
+			else
+			{
+				print_hex(r);
+			}
+
 			if (r == 0x03)
 			{
 				putstr("\r\nCTRL-C\r\n");
 				break;
 			}
-			bdos_direct_console_io(r);
+
+			if (r == 'q)')
+				bdos_reset();
+
 		}
 		else
 		{
 			bdos_direct_console_io('.');
 		}
 		delay(10000);
+		IO1 = IO3;
+		IO3 = IO1;
 	}
 	return 0;
 }

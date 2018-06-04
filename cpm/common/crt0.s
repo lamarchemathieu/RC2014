@@ -1,11 +1,19 @@
 	.module crt0
 	.globl	_main
-
+	.globl  __sp
 	.area	_HEADER (ABS)
 
 	.org 	0x0100
 init:
 	call	gsinit
+	ld hl, #0x0000
+	add hl, sp
+	ld de, #__sp
+	ld a, l
+	ld (de), a
+	inc de
+	ld a, h
+	ld (de), a
 	call	_main
 	ret
 
@@ -13,7 +21,7 @@ init:
 	.area	_CODE
 	.area   _INITIALIZER
 	.area   _GSINIT
-        .area   _GSFINAL
+	.area   _GSFINAL
 	.area	_DATA
 	.area   _INITIALIZED
 	.area   _BSEG
