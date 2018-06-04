@@ -12,33 +12,33 @@ RELS=${ASMS:.s=.rel} ${SRCS:.c=.rel}
 all: ${TARGET}.txt
 
 %.rel:%.s
-	@echo "AS $@"
+	@echo " [AS] $<"
 	@$(AS) -plosgffw $@ $<
 
 %.rel:%.c
-	@echo "CC $@"
+	@echo " [CC] $<"
 	@$(CC) $(MFLAGS) $(LFLAGS) -o $@ -c $<
 
 ${TARGET}.ihx: ${RELS}
-	@echo "LD $@"
+	@echo " [LD] $@"
 	@$(CC) $(MFLAGS) $(LFLAGS) -o $@ --no-std-crt0 ${RELS}
 
 ${TARGET}.bin: ${TARGET}.ihx
-	@echo "BIN $@"
+	@echo " [BIN] $<"
 	@objcopy -I ihex --output-target=binary $< $@
 
 ${TARGET}.com: ${TARGET}.bin
-	@echo "COM $@"
+	@echo " [COM] $<"
 	@cp $< $@
 
 
 ${TARGET}.txt: ${TARGET}.com
-	@echo "TXT $@"
+	@echo " [TXT] $<"
 	@./filepack.py $< > $@
 
 
 clean:
-	@echo "RM $@"
+	@echo " [RM] $@"
 	@rm -f *.cdb *.rel *.hex *.ihx *.lst *.map *.o *.rst \
 	*.sym *.lnk *.lib *.bin *.mem *.lk *.noi *.asm *.txt *.com
 
