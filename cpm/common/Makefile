@@ -19,28 +19,24 @@ all: ${TARGET}.txt
 	@echo "CC $@"
 	@$(CC) $(MFLAGS) $(LFLAGS) -o $@ -c $<
 
-# Compilation de prem.c et édition de liens
 ${TARGET}.ihx: ${RELS}
 	@echo "LD $@"
-	@$(CC) $(MFLAGS) $(LFLAGS) -o ${TARGET}.ihx --no-std-crt0 ${RELS}
+	@$(CC) $(MFLAGS) $(LFLAGS) -o $@ --no-std-crt0 ${RELS}
 
-# Conversion de l'Intel Hex en binaire
 ${TARGET}.bin: ${TARGET}.ihx
 	@echo "BIN $@"
-	@makebin -p < ${TARGET}.ihx > tmp.bin
-	@dd if=tmp.bin of=${TARGET}.bin bs=1 skip=256
-	@objcopy -I ihex --output-target=binary ${TARGET}.ihx ${TARGET}.com
+	@objcopy -I ihex --output-target=binary $< $@
 
-${TARGET}.txt: ${TARGET}.bin
+${TARGET}.com: ${TARGET}.bin
+	@echo "COM $@"
+	@cp $< $@
+
+
+${TARGET}.txt: ${TARGET}.com
 	@echo "TXT $@"
-	@mv ${TARGET}.bin ${TARGET}.com
-	@./filepack.py ${TARGET}.com > ${TARGET}.txt
+	@./filepack.py $< > $@
 
-# Désassemblage à l'écran
-disasm: ${TARGET}.bin
-	z80dasm -a -t -g 0x0 -l ${TARGET}.bin
 
-# Affacement des fichiers, nettoyage
 clean:
 	@echo "RM $@"
 	@rm -f *.cdb *.rel *.hex *.ihx *.lst *.map *.o *.rst \
@@ -49,4 +45,3 @@ clean:
 print-%:
 	@echo "$* = ${$*}"
 
-.SUFFIXES: .rel
